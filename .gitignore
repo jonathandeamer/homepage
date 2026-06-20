@@ -1,5 +1,13 @@
-*
-!.gitignore
-!index.html
-!404.html
-!style.css
+.DS_Store
+
+# Hugo output and caches
+public/
+resources/_gen/
+.hugo_build.lock
+
+# Generated deploy config written from local environment variables
+.hugo-deploy.generated.toml
+
+# Local worktrees and brainstorming/mockup scratch files
+.worktrees/
+.superpowers/

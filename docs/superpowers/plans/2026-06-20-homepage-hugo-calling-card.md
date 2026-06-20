@@ -60,7 +60,8 @@ resources/_gen/
 # Generated deploy config written from local environment variables
 .hugo-deploy.generated.toml
 
-# Local brainstorming/mockup scratch files
+# Local worktrees and brainstorming/mockup scratch files
+.worktrees/
 .superpowers/
 ```
 
@@ -79,10 +80,10 @@ Expected: no output.
 Run:
 
 ```bash
-git check-ignore -v .superpowers/example public/index.html .hugo-deploy.generated.toml
+git check-ignore -v .worktrees/example .superpowers/example public/index.html .hugo-deploy.generated.toml
 ```
 
-Expected: three lines showing `.gitignore` rules for `.superpowers/`, `public/`, and `.hugo-deploy.generated.toml`.
+Expected: four lines showing `.gitignore` rules for `.worktrees/`, `.superpowers/`, `public/`, and `.hugo-deploy.generated.toml`.
 
 - [ ] **Step 4: Commit**
 
