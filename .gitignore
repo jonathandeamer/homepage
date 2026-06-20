@@ -1,5 +1,9 @@
 .DS_Store
 
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+
 # Hugo output and caches
 public/
 resources/_gen/
