@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Enforce conventional commits with a required scope.
+
+set -e
+
+msg_file="$1"
+first_line=$(head -n1 "$msg_file")
+
+if [[ "$first_line" =~ ^(Merge|Revert|fixup!|squash!|amend!)\  ]]; then
+  exit 0
+fi
+
+types='feat|fix|style|refactor|docs|chore|build'
+scopes='home|404|css|font|asset|config|script|spec|plan|deploy'
+
+pattern="^($types)\\(($scopes)\\): [a-z0-9].{1,70}[^.]$"
+
+if ! [[ "$first_line" =~ $pattern ]]; then
+  echo
+  echo "Commit message does not match the required format."
+  echo
+  echo "  Required:   type(scope): subject"
+  echo "  Types:      $types"
+  echo "  Scopes:     $scopes"
+  echo "  Subject:    lowercase start, no trailing period, <=72 chars total"
+  echo
+  echo "  Got:        $first_line"
+  echo
+  echo "  Examples:"
+  echo "    feat(home): migrate calling card to hugo"
+  echo "    style(css): tighten portrait spacing"
+  echo "    build(deploy): add hugo deploy config writer"
+  echo
+  exit 1
+fi
