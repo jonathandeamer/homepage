@@ -90,7 +90,7 @@ img {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(14rem, 20rem);
   gap: clamp(1.25rem, 4vw, 3rem);
-  align-items: start;
+  align-items: center;
   padding: clamp(1.25rem, 4vw, 3rem);
   border: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
   background: linear-gradient(135deg, var(--panel), var(--panel-soft));
