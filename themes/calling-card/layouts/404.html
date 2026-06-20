@@ -1,0 +1,12 @@
+{{ define "title" }}404 — {{ site.Title }}{{ end }}
+{{ define "main" }}
+<article class="card notfound" aria-labelledby="notfound-title">
+  <div class="card-copy">
+    <p class="eyebrow">Page not found</p>
+    <h1 id="notfound-title">404: there's nothing here</h1>
+    <p class="intro">Sorry :(</p>
+    <p><a href="mailto:jonathandeamer@gmail.com">Get in touch</a> if you were looking for something specific — I used to write lots about music and tech in particular, and that no longer lives on this domain.</p>
+    <p><a href="{{ "/" | relURL }}">Back to the homepage</a></p>
+  </div>
+</article>
+{{ end }}

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="{{ site.Language.Lang | default "en-gb" }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ block "title" . }}{{ site.Title }}{{ end }}</title>
+  {{ partial "head-meta.html" . }}
+  {{ block "head" . }}{{ end }}
+</head>
+<body>
+  <a class="skip-nav" href="#main-content">Skip to content</a>
+  <main class="page" id="main-content">
+    {{ block "main" . }}{{ end }}
+    {{ partial "footer.html" . }}
+  </main>
+</body>
+</html>

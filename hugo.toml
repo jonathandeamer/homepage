@@ -1,0 +1,26 @@
+baseURL = "https://jonathandeamer.com/"
+defaultContentLanguage = "en-gb"
+locale = "en-gb"
+title = "Jonathan Deamer"
+theme = "calling-card"
+enableRobotsTXT = true
+disableKinds = ["taxonomy", "term", "section", "RSS"]
+disableHugoGeneratorInject = true
+
+[outputs]
+  home = ["HTML"]
+  page = ["HTML"]
+
+[imaging]
+  quality = 82
+  resampleFilter = "Lanczos"
+  hint = "photo"
+  anchor = "smart"
+
+[minify]
+  minifyOutput = true
+
+[params]
+  author = "Jonathan Deamer"
+  description = "Places you can find Jonathan Deamer online, and ways to get in touch."
+  themeColor = "#203125"

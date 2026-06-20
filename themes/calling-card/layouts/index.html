@@ -1,0 +1,36 @@
+{{ define "main" }}
+{{ $portrait := resources.Get .Params.portrait.src }}
+{{ if not $portrait }}{{ errorf "missing portrait asset %q" .Params.portrait.src }}{{ end }}
+{{ $portraitWebp := $portrait.Resize "360x360 webp q82" }}
+{{ $portraitPng := $portrait.Resize "360x360 png" }}
+
+<article class="card" aria-labelledby="site-title">
+  <div class="card-copy">
+    <p class="eyebrow">Personal homepage</p>
+    <h1 id="site-title">{{ .Title }}</h1>
+    <p class="intro">{{ .Params.intro }}</p>
+
+    <nav class="link-groups" aria-label="Places to find Jonathan online">
+      {{ range .Params.links }}
+        <section class="link-group" aria-labelledby="links-{{ .label | anchorize }}">
+          <h2 id="links-{{ .label | anchorize }}">{{ .label }}</h2>
+          <ul>
+            {{ range .items }}
+              <li><a href="{{ .url }}"{{ with .rel }} rel="{{ . }}"{{ end }}>{{ .name }}</a></li>
+            {{ end }}
+          </ul>
+        </section>
+      {{ end }}
+    </nav>
+  </div>
+
+  <aside class="portrait" aria-label="Portrait">
+    <a href="{{ .Params.portrait.href }}">
+      <picture>
+        <source type="image/webp" srcset="{{ $portraitWebp.RelPermalink }}">
+        <img src="{{ $portraitPng.RelPermalink }}" alt="{{ .Params.portrait.alt }}" width="{{ $portraitPng.Width }}" height="{{ $portraitPng.Height }}">
+      </picture>
+    </a>
+  </aside>
+</article>
+{{ end }}

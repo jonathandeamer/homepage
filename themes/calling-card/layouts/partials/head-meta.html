@@ -1,0 +1,48 @@
+{{ $description := .Description | default site.Params.description }}
+{{ if eq .Kind "404" }}{{ $description = "404 error" }}{{ end }}
+{{ $themeColor := site.Params.themeColor | default "#203125" }}
+{{ $canonical := .Permalink }}
+{{ if eq .Kind "404" }}{{ $canonical = "404.html" | absURL }}{{ end }}
+
+<meta name="description" content="{{ $description }}">
+{{ if eq .Kind "404" }}<meta name="robots" content="noindex, nofollow">{{ end }}
+<meta name="theme-color" content="{{ $themeColor }}">
+<link rel="canonical" href="{{ $canonical }}">
+<link rel="icon" type="image/png" href="{{ "favicon.png" | relURL }}">
+<link rel="preload" href="{{ "fonts/fraunces-latin.woff2" | relURL }}" as="font" type="font/woff2" crossorigin>
+<link rel="me" href="https://tilde.zone/@JonathanDeamer">
+
+{{ with resources.Get "css/site.css" | minify | fingerprint }}
+  <style>{{ .Content | safeCSS }}</style>
+{{ end }}
+
+{{ $ogTitle := site.Title }}
+{{ if not .IsHome }}{{ $ogTitle = printf "%s — %s" .Title site.Title }}{{ end }}
+{{ if eq .Kind "404" }}{{ $ogTitle = printf "404 — %s" site.Title }}{{ end }}
+<meta property="og:site_name" content="{{ site.Title }}">
+<meta property="og:title" content="{{ $ogTitle }}">
+<meta property="og:description" content="{{ $description }}">
+<meta property="og:url" content="{{ $canonical }}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_GB">
+
+{{ $portrait := "" }}
+{{ $portraitAlt := "" }}
+{{ if .IsHome }}
+  {{ $portrait = .Params.portrait.src }}
+  {{ $portraitAlt = .Params.portrait.alt }}
+{{ end }}
+{{ with $portrait }}
+  {{ with resources.Get . }}
+    {{ $og := .Resize "1200x1200 webp q82" }}
+    <meta property="og:image" content="{{ $og.Permalink }}">
+    <meta property="og:image:width" content="{{ $og.Width }}">
+    <meta property="og:image:height" content="{{ $og.Height }}">
+    {{ with $portraitAlt }}<meta property="og:image:alt" content="{{ . }}">{{ end }}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ $og.Permalink }}">
+    {{ with $portraitAlt }}<meta name="twitter:image:alt" content="{{ . }}">{{ end }}
+  {{ end }}
+{{ else }}
+  <meta name="twitter:card" content="summary">
+{{ end }}
