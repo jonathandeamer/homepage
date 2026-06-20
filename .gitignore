@@ -12,6 +12,9 @@ resources/_gen/
 # Generated deploy config written from local environment variables
 .hugo-deploy.generated.toml
 
+# Local deploy credentials/config (HOMEPAGE_* env vars)
+.deploy.env
+
 # Local worktrees and brainstorming/mockup scratch files
 .worktrees/
 .superpowers/
