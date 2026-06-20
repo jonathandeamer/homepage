@@ -34,3 +34,25 @@ class DeployConfigTests(TestCase):
             with patch.dict(os.environ, env, clear=True):
                 self.assertEqual(main([str(output)]), 0)
             self.assertIn('URL = "s3://jonathandeamer.com?region=eu-west-2"', output.read_text())
+
+    def test_main_rejects_malformed_distribution_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "deploy.toml"
+            env = {
+                "HOMEPAGE_S3_URL": "s3://jonathandeamer.com?region=eu-west-2",
+                "HOMEPAGE_CLOUDFRONT_DISTRIBUTION_ID": 'E123"\ninjected',
+            }
+            with patch.dict(os.environ, env, clear=True):
+                self.assertEqual(main([str(output)]), 2)
+            self.assertFalse(output.exists())
+
+    def test_main_rejects_s3_url_with_unsafe_characters(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "deploy.toml"
+            env = {
+                "HOMEPAGE_S3_URL": 's3://jonathandeamer.com"\ninjected',
+                "HOMEPAGE_CLOUDFRONT_DISTRIBUTION_ID": "E123",
+            }
+            with patch.dict(os.environ, env, clear=True):
+                self.assertEqual(main([str(output)]), 2)
+            self.assertFalse(output.exists())

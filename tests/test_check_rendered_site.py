@@ -83,3 +83,17 @@ class RenderedSiteAuditTests(TestCase):
 
             self.assertIn("index.html: missing non-empty canonical link", audit_rendered_site(root))
             self.assertIn("index.html: missing rel=me link", audit_rendered_site(root))
+
+    def test_reports_canonical_mismatch(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            wrong_canonical = HOME_HEAD.replace(f'href="{SITE}/"', 'href="https://example.com/"')
+            write(root / "index.html", page(wrong_canonical))
+            write(root / "404.html", page(NOT_FOUND_HEAD, "<h1>404: there's nothing here</h1>"))
+            write(root / "sitemap.xml", f"<?xml version='1.0'?><urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'><url><loc>{SITE}/</loc></url></urlset>")
+            write(root / "robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n")
+
+            self.assertIn(
+                f"index.html: canonical 'https://example.com/' does not match expected '{SITE}/'",
+                audit_rendered_site(root),
+            )

@@ -4,6 +4,7 @@
 {{ $canonical := .Permalink }}
 {{ if eq .Kind "404" }}{{ $canonical = "404.html" | absURL }}{{ end }}
 
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; font-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="description" content="{{ $description }}">
 {{ if eq .Kind "404" }}<meta name="robots" content="noindex, nofollow">{{ end }}
 <meta name="theme-color" content="{{ $themeColor }}">
@@ -34,13 +35,17 @@
 {{ end }}
 {{ with $portrait }}
   {{ with resources.Get . }}
-    {{ $og := .Resize "1200x1200 webp q82" }}
-    <meta property="og:image" content="{{ $og.Permalink }}">
-    <meta property="og:image:width" content="{{ $og.Width }}">
-    <meta property="og:image:height" content="{{ $og.Height }}">
+    {{ $ogPng := .Resize "1200x1200 png" }}
+    {{ $ogWebp := .Resize "1200x1200 webp q82" }}
+    <meta property="og:image" content="{{ $ogPng.Permalink }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="{{ $ogPng.Width }}">
+    <meta property="og:image:height" content="{{ $ogPng.Height }}">
     {{ with $portraitAlt }}<meta property="og:image:alt" content="{{ . }}">{{ end }}
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="{{ $og.Permalink }}">
+    <meta property="og:image" content="{{ $ogWebp.Permalink }}">
+    <meta property="og:image:type" content="image/webp">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:image" content="{{ $ogPng.Permalink }}">
     {{ with $portraitAlt }}<meta name="twitter:image:alt" content="{{ . }}">{{ end }}
   {{ end }}
 {{ else }}

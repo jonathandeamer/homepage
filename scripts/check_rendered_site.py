@@ -83,8 +83,10 @@ def audit_page(path: Path, expected_canonical: str, required_meta: list[tuple[st
     errors: list[str] = []
     if not parser.title:
         errors.append(f"{label}: missing non-empty title")
-    if parser.canonical != expected_canonical:
+    if not parser.canonical:
         errors.append(f"{label}: missing non-empty canonical link")
+    elif parser.canonical != expected_canonical:
+        errors.append(f"{label}: canonical {parser.canonical!r} does not match expected {expected_canonical!r}")
     if parser.rel_me != "https://tilde.zone/@JonathanDeamer":
         errors.append(f"{label}: missing rel=me link")
     if not parser.meta.get(("name", "description"), "").strip():

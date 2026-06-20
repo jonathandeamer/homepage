@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -11,6 +12,9 @@ from pathlib import Path
 OUTPUT = Path(".hugo-deploy.generated.toml")
 S3_ENV = "HOMEPAGE_S3_URL"
 CF_ENV = "HOMEPAGE_CLOUDFRONT_DISTRIBUTION_ID"
+
+# CloudFront distribution IDs are uppercase alphanumeric (e.g. E1A2B3C4D5E6F7).
+DISTRIBUTION_ID_RE = re.compile(r"^[A-Z0-9]+$")
 
 
 def deploy_config(s3_url: str, distribution_id: str) -> str:
@@ -47,6 +51,12 @@ def main(argv: list[str]) -> int:
         return 2
     if not s3_url.startswith("s3://"):
         print(f"{S3_ENV} must start with s3://", file=sys.stderr)
+        return 2
+    if any(ch in s3_url for ch in '"\\\r\n') or s3_url != s3_url.strip():
+        print(f"{S3_ENV} contains characters that are not allowed", file=sys.stderr)
+        return 2
+    if not DISTRIBUTION_ID_RE.match(distribution_id):
+        print(f"{CF_ENV} must be uppercase alphanumeric", file=sys.stderr)
         return 2
 
     output.write_text(deploy_config(s3_url, distribution_id))

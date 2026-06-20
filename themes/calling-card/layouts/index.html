@@ -25,7 +25,7 @@
   </div>
 
   <aside class="portrait" aria-label="Portrait">
-    <a href="{{ .Params.portrait.href }}">
+    <a href="{{ .Params.portrait.href }}" aria-label="View this photo of Jonathan Deamer on Flickr">
       <picture>
         <source type="image/webp" srcset="{{ $portraitWebp.RelPermalink }}">
         <img src="{{ $portraitPng.RelPermalink }}" alt="{{ .Params.portrait.alt }}" width="{{ $portraitPng.Width }}" height="{{ $portraitPng.Height }}">
