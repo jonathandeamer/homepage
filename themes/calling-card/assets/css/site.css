@@ -179,14 +179,31 @@ h1 {
 }
 
 .site-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.1rem;
   margin-top: 1rem;
   color: var(--muted);
   font-size: 0.88rem;
-  text-align: center;
 }
 
-.site-footer p {
-  margin: 0;
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  color: var(--link-hover);
+}
+
+.footer-icon {
+  width: 1.2em;
+  height: 1.2em;
+  display: block;
 }
 
 .notfound {
