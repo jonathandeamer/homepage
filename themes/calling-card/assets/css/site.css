@@ -1,9 +1,9 @@
 @font-face {
-  font-family: "Fraunces";
-  font-weight: 100 900;
+  font-family: "Newsreader";
+  font-weight: 200 800;
   font-style: normal;
   font-display: swap;
-  src: url("/fonts/fraunces-latin.woff2") format("woff2");
+  src: url("/fonts/newsreader-latin.woff2") format("woff2");
 }
 
 :root {
@@ -19,7 +19,7 @@
   --link: #dd8b6e;
   --link-hover: var(--ink);
   --shadow: rgba(0, 0, 0, 0.22);
-  --serif: "Fraunces", "Iowan Old Style", "Hoefler Text", Georgia, serif;
+  --serif: "Newsreader", "Iowan Old Style", "Hoefler Text", Georgia, serif;
 }
 
 * { box-sizing: border-box; }
@@ -40,7 +40,7 @@ body {
   color: var(--ink);
   background: transparent;
   font-family: var(--serif);
-  font-variation-settings: "opsz" 18, "SOFT" 45;
+  font-variation-settings: "opsz" 18;
   font-size: clamp(17px, 1vw + 14px, 19px);
   line-height: 1.55;
 }
@@ -111,7 +111,7 @@ h1 {
   font-weight: 520;
   font-size: clamp(2.4rem, 6vw, 4rem);
   line-height: 0.98;
-  font-variation-settings: "opsz" 120, "SOFT" 90, "WONK" 1;
+  font-variation-settings: "opsz" 72;
 }
 
 .intro {
