@@ -13,7 +13,7 @@ Design rationale lives in `docs/superpowers/specs/`. Implementation plans live i
 The repo is a Hugo site plus two small Python support tools. The "big picture" worth knowing:
 
 - **One theme, `themes/calling-card`.** `layouts/_default/baseof.html` is the shell; `layouts/index.html` renders the home card; `layouts/404.html` the error page. `partials/head-meta.html` builds every `<meta>`/OpenGraph/Twitter tag, inlines + fingerprints the CSS, and preloads the font — it's where most cross-cutting head logic lives.
-- **Content is data-driven from `content/_index.md`.** Front matter defines the `links` (labelled groups of `{name, url, rel?}`), the `portrait`, `intro`, and `license`. The page **body markdown** is rendered via `.Content` as the muted aside near the footer (e.g. the Small Observations note) — so homepage copy is split between front matter *and* body; check both.
+- **Content is data-driven from `content/_index.md`.** Front matter defines the `links` (labelled groups of `{name, url, rel?}`), the `portrait`, `intro`, and `license`. The page **body markdown** is rendered via `.Content` as the muted aside near the footer (e.g. the Small Observations note) — so homepage copy is split between front matter *and* body; check both. When changing homepage links, descriptions, related sites, licensing, or portrait attribution, update `static/llms.txt` in the same change so `/llms.txt` stays aligned with the visible page.
 - **The public contract is executable, not just prose.** `scripts/check_rendered_site.py` (run by `make check`) asserts the rendered output: non-empty title/description/canonical, `rel=me`, required OG/Twitter meta on `/` and `/404.html`, `/llms.txt` exists with the expected Markdown links, no RSS/feed files, sitemap includes `/` but excludes the 404, robots points at the sitemap. Any change to the public surface must be reflected here and in `tests/`.
 - **Images run through Hugo's pipeline at build time.** The portrait lives in `assets/img/` and is `Resize`d in templates to produce the responsive `webp`/`png` in the card and the 1200×1200 OG images. There are no pre-rendered derivatives committed.
 - **Deploy config is generated and fail-closed.** `scripts/write_deploy_config.py` writes `.hugo-deploy.generated.toml` from the `HOMEPAGE_*` env vars, validating the `s3://` URL and CloudFront distribution ID before writing; `make deploy` then feeds it to Hugo's deployer.
@@ -50,7 +50,7 @@ make deploy       # production deploy to S3 + CloudFront
 
 - One local theme: `themes/calling-card`.
 - Editable homepage data lives in `content/_index.md`.
-- The LLM summary lives in `static/llms.txt` and is copied directly to `/llms.txt`.
+- The LLM summary lives in `static/llms.txt` and is copied directly to `/llms.txt`; keep it in sync with current homepage content rather than treating it as generated output.
 - No runtime JavaScript.
 - No third-party requests.
 - One self-hosted expressive serif font.
