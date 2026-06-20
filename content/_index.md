@@ -1,6 +1,6 @@
 ---
 title: "Jonathan Deamer"
-description: "Places you can find Jonathan Deamer online, and ways to get in touch."
+description: "Places you can find me online, and ways to get in touch."
 intro: "Places you can find me online, and ways to get in touch."
 portrait:
   src: "img/jonathan-deamer.png"

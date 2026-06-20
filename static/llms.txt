@@ -1,0 +1,35 @@
+# Jonathan Deamer
+
+> Personal homepage for Jonathan Deamer, with links to places he can be found online and ways to get in touch.
+
+## Key Pages
+
+- [Homepage](https://jonathandeamer.com/): Personal calling-card homepage.
+
+## Contact
+
+- [Email](mailto:jonathandeamer@gmail.com): Direct contact.
+
+## Professional
+
+- [LinkedIn](https://www.linkedin.com/in/jonathandeamer/): Work history and professional background: martech and analytics at Penguin Random House, data consultant and solution architect at Treasure AI.
+
+## Elsewhere
+
+- [Wikipedia](https://en.wikipedia.org/wiki/User:Jonathan_Deamer): Jonathan is a Wikipedia editor.
+- [Strava](https://www.strava.com/athletes/18361576): Cycling and running activity.
+- [GitHub](https://github.com/jonathandeamer): Software projects including an OpenClaw skill and work with smallnet protocols like Nex.
+
+## Social
+
+- [Bluesky](https://bsky.app/profile/jonathandeamer.bsky.social): Social posts.
+- [Mastodon](https://tilde.zone/@JonathanDeamer): Fediverse account verified from this site.
+- [Threads](https://www.threads.net/@jonathandeamer): Social posts.
+- [Twitter](https://twitter.com/JonathanDeamer): Older social account.
+
+## Related
+
+- [Small Observations](https://smallobservations.net/): Jonathan's notebook of street art photography.
+- [Homepage source](https://github.com/jonathandeamer/homepage): Source code for this website.
+- [Portrait photo](https://www.flickr.com/photos/jonathandeamer/50782596227/): Source photo used on the homepage.
+- [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/): Content licence unless otherwise stated.

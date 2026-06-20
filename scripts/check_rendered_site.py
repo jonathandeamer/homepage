@@ -25,6 +25,22 @@ REQUIRED_404_META = [
     ("property", "og:url"),
     ("name", "twitter:card"),
 ]
+REQUIRED_LLMS_LINKS = [
+    ("Homepage", f"{SITE}/"),
+    ("Email", "mailto:jonathandeamer@gmail.com"),
+    ("LinkedIn", "https://www.linkedin.com/in/jonathandeamer/"),
+    ("Wikipedia", "https://en.wikipedia.org/wiki/User:Jonathan_Deamer"),
+    ("Strava", "https://www.strava.com/athletes/18361576"),
+    ("GitHub", "https://github.com/jonathandeamer"),
+    ("Bluesky", "https://bsky.app/profile/jonathandeamer.bsky.social"),
+    ("Mastodon", "https://tilde.zone/@JonathanDeamer"),
+    ("Threads", "https://www.threads.net/@jonathandeamer"),
+    ("Twitter", "https://twitter.com/JonathanDeamer"),
+    ("Small Observations", "https://smallobservations.net/"),
+    ("Homepage source", "https://github.com/jonathandeamer/homepage"),
+    ("Portrait photo", "https://www.flickr.com/photos/jonathandeamer/50782596227/"),
+    ("Creative Commons Attribution 4.0", "https://creativecommons.org/licenses/by/4.0/"),
+]
 
 
 class HeadParser(HTMLParser):
@@ -125,6 +141,24 @@ def audit_robots(public_dir: Path) -> list[str]:
     return []
 
 
+def audit_llms(public_dir: Path) -> list[str]:
+    path = public_dir / "llms.txt"
+    if not path.exists():
+        return ["llms.txt: missing file"]
+
+    text = path.read_text()
+    errors: list[str] = []
+    if not text.startswith("# Jonathan Deamer\n"):
+        errors.append("llms.txt: missing # Jonathan Deamer heading")
+    if "\n> Personal homepage for Jonathan Deamer" not in text:
+        errors.append("llms.txt: missing summary blockquote")
+    for label, url in REQUIRED_LLMS_LINKS:
+        link = f"[{label}]({url})"
+        if link not in text:
+            errors.append(f"llms.txt: missing {link}")
+    return errors
+
+
 def audit_rendered_site(public_dir: Path) -> list[str]:
     errors: list[str] = []
     errors.extend(audit_page(public_dir / "index.html", f"{SITE}/", REQUIRED_HOME_META))
@@ -136,6 +170,7 @@ def audit_rendered_site(public_dir: Path) -> list[str]:
 
     errors.extend(audit_sitemap(public_dir))
     errors.extend(audit_robots(public_dir))
+    errors.extend(audit_llms(public_dir))
     return errors
 
 

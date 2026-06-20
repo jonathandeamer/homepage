@@ -15,12 +15,12 @@ def write(path: Path, text: str) -> None:
 
 HOME_HEAD = f"""
 <title>Jonathan Deamer</title>
-<meta name="description" content="Places you can find Jonathan Deamer online, and ways to get in touch.">
+<meta name="description" content="Places you can find me online, and ways to get in touch.">
 <meta name="theme-color" content="#203125">
 <link rel="canonical" href="{SITE}/">
 <link rel="me" href="https://tilde.zone/@JonathanDeamer">
 <meta property="og:title" content="Jonathan Deamer">
-<meta property="og:description" content="Places you can find Jonathan Deamer online, and ways to get in touch.">
+<meta property="og:description" content="Places you can find me online, and ways to get in touch.">
 <meta property="og:url" content="{SITE}/">
 <meta name="twitter:card" content="summary_large_image">
 """
@@ -40,6 +40,44 @@ NOT_FOUND_HEAD = f"""
 """
 
 
+LLMS_TXT = f"""# Jonathan Deamer
+
+> Personal homepage for Jonathan Deamer, with links to places he can be found online and ways to get in touch.
+
+## Key Pages
+
+- [Homepage]({SITE}/): Personal calling-card homepage.
+
+## Contact
+
+- [Email](mailto:jonathandeamer@gmail.com): Direct contact.
+
+## Professional
+
+- [LinkedIn](https://www.linkedin.com/in/jonathandeamer/): Work history and professional background.
+
+## Elsewhere
+
+- [Wikipedia](https://en.wikipedia.org/wiki/User:Jonathan_Deamer): Wikipedia user page.
+- [Strava](https://www.strava.com/athletes/18361576): Cycling and running activity.
+- [GitHub](https://github.com/jonathandeamer): Software projects and code.
+
+## Social
+
+- [Bluesky](https://bsky.app/profile/jonathandeamer.bsky.social): Social posts.
+- [Mastodon](https://tilde.zone/@JonathanDeamer): Fediverse account verified from this site.
+- [Threads](https://www.threads.net/@jonathandeamer): Social posts.
+- [Twitter](https://twitter.com/JonathanDeamer): Older social account.
+
+## Related
+
+- [Small Observations](https://smallobservations.net/): Jonathan's notebook of street art photography.
+- [Homepage source](https://github.com/jonathandeamer/homepage): Source code for this website.
+- [Portrait photo](https://www.flickr.com/photos/jonathandeamer/50782596227/): Source photo used on the homepage.
+- [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/): Content licence unless otherwise stated.
+"""
+
+
 def page(head: str, body: str = "<h1>Jonathan Deamer</h1>") -> str:
     return f"<!doctype html><html lang='en-gb'><head>{head}</head><body>{body}</body></html>"
 
@@ -52,6 +90,7 @@ class RenderedSiteAuditTests(TestCase):
             write(root / "404.html", page(NOT_FOUND_HEAD, "<h1>404: there's nothing here</h1>"))
             write(root / "sitemap.xml", f"<?xml version='1.0'?><urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'><url><loc>{SITE}/</loc></url></urlset>")
             write(root / "robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n")
+            write(root / "llms.txt", LLMS_TXT)
 
             self.assertEqual(audit_rendered_site(root), [])
 
@@ -70,6 +109,7 @@ class RenderedSiteAuditTests(TestCase):
                     "index.xml: RSS/feed output must not be generated",
                     "sitemap.xml: missing file",
                     "robots.txt: missing file",
+                    "llms.txt: missing file",
                 ],
             )
 
