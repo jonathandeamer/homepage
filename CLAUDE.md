@@ -61,12 +61,30 @@ make deploy       # production deploy to S3 + CloudFront
 
 ## Deployment
 
-Deployment uses Hugo's deployer with S3 and CloudFront. `make deploy` and `make deploy-dry` require:
+Deployment uses Hugo's deployer with S3 and CloudFront. Unlike the deploy
+target, these values live outside the repo (in env vars, not `hugo.toml`), so
+`make deploy` and `make deploy-dry` require:
 
 ```text
-HOMEPAGE_S3_URL
-HOMEPAGE_CLOUDFRONT_DISTRIBUTION_ID
-HOMEPAGE_AWS_PROFILE
+HOMEPAGE_S3_URL                       # s3://jonathandeamer.com?region=eu-west-2
+HOMEPAGE_CLOUDFRONT_DISTRIBUTION_ID   # E1C2VU2IB8K3UT
+HOMEPAGE_AWS_PROFILE                  # hugo-deploy (optional; falls back to default)
 ```
+
+The live infrastructure already exists and serves the site: S3 bucket
+`jonathandeamer.com` (eu-west-2) behind CloudFront `E1C2VU2IB8K3UT` (aliases
+`jonathandeamer.com`, `www.jonathandeamer.com`).
+
+Credentials come from the shared **`hugo-deploy`** IAM user
+(`arn:aws:iam::017635961881:user/hugo-deploy`), which also deploys
+`smallobservations.net`. Its `HomepageDeployPolicy` grants least-privilege
+access: `s3:ListBucket`/`GetBucketLocation` on the bucket,
+`GetObject`/`PutObject`/`DeleteObject` on its objects, and
+`cloudfront:CreateInvalidation`/`GetInvalidation` on the distribution. The
+matching local AWS profile is `hugo-deploy`.
+
+For convenience the three vars live in a gitignored `.deploy.env` at the repo
+root — deploy with `source .deploy.env && make deploy` (preview first with
+`make deploy-dry`).
 
 Do not guess AWS values. If they are not available, fail clearly and ask the user.
