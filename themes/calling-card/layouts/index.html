@@ -21,6 +21,8 @@
         </section>
       {{ end }}
     </nav>
+
+    {{ with .Content }}<aside class="site-note">{{ . }}</aside>{{ end }}
   </div>
 
   <aside class="portrait" aria-label="Portrait">

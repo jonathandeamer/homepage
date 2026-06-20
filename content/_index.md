@@ -21,6 +21,8 @@ links:
         url: "https://en.wikipedia.org/wiki/User:Jonathan_Deamer"
       - name: "Strava"
         url: "https://www.strava.com/athletes/18361576"
+      - name: "GitHub"
+        url: "https://github.com/jonathandeamer"
   - label: "Social"
     items:
       - name: "Bluesky"
@@ -36,3 +38,5 @@ license:
   text: "Everything on this site CC-BY unless otherwise stated."
   url: "https://creativecommons.org/licenses/by/4.0/"
 ---
+
+I also keep [Small Observations](https://smallobservations.net/), a notebook of street art photography.
