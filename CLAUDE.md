@@ -8,6 +8,10 @@ This is the Hugo source for `https://jonathandeamer.com/`, a tiny personal calli
 
 Design rationale lives in `docs/superpowers/specs/`. Implementation plans live in `docs/superpowers/plans/`. Read them before non-trivial changes.
 
+## Workflow
+
+Committing directly to `main` is fine in this repo — no feature branch or PR is required unless the user asks for one. Commit messages must follow the `commit-msg` hook format (`type(scope): subject`); run `make check` before committing non-trivial changes.
+
 ## Commands
 
 Use `make`, not plain `hugo`.
