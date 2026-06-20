@@ -1,7 +1,7 @@
 # Jonathan Deamer homepage - common tasks
 
 .DEFAULT_GOAL := help
-.PHONY: help dev build test check clean
+.PHONY: help dev build test check clean deploy deploy-dry
 
 help:  ## list available targets
 	@grep -E '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -58,3 +58,19 @@ check: build test  ## build then sanity-check rendered output
 
 clean:  ## remove generated output
 	rm -rf public resources/_gen .hugo_build.lock .hugo-deploy.generated.toml
+
+deploy: build  ## deploy production build to S3 and invalidate CloudFront
+	python3 scripts/write_deploy_config.py
+	@if [ -n "$$HOMEPAGE_AWS_PROFILE" ]; then \
+		AWS_PROFILE="$$HOMEPAGE_AWS_PROFILE" hugo --config hugo.toml,.hugo-deploy.generated.toml deploy --target production; \
+	else \
+		hugo --config hugo.toml,.hugo-deploy.generated.toml deploy --target production; \
+	fi
+
+deploy-dry: build  ## show production deploy changes without uploading
+	python3 scripts/write_deploy_config.py
+	@if [ -n "$$HOMEPAGE_AWS_PROFILE" ]; then \
+		AWS_PROFILE="$$HOMEPAGE_AWS_PROFILE" hugo --config hugo.toml,.hugo-deploy.generated.toml deploy --target production --dryRun; \
+	else \
+		hugo --config hugo.toml,.hugo-deploy.generated.toml deploy --target production --dryRun; \
+	fi
