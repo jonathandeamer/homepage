@@ -1,7 +1,11 @@
 # Jonathan Deamer homepage - common tasks
 
 .DEFAULT_GOAL := help
-.PHONY: help dev build test check clean deploy deploy-dry
+.PHONY: help dev build test check screenshots clean deploy deploy-dry
+
+# Interpreter for the optional screenshots target. Override if your Playwright
+# venv lives elsewhere, e.g. make screenshots PLAYWRIGHT_PYTHON=/path/to/python
+PLAYWRIGHT_PYTHON ?= $(HOME)/.venvs/playwright/bin/python
 
 help:  ## list available targets
 	@grep -E '^[a-zA-Z_-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-14s %s\n", $$1, $$2}'
@@ -55,6 +59,17 @@ check: build test  ## build then sanity-check rendered output
 	@xmllint --noout public/sitemap.xml
 	@echo "    ok"
 	@echo
+
+screenshots: build  ## capture desktop/mobile/404 screenshots to tmp/screenshots
+	@if [ ! -x "$(PLAYWRIGHT_PYTHON)" ]; then \
+		echo "Playwright interpreter not found at $(PLAYWRIGHT_PYTHON)"; \
+		echo "create it with:"; \
+		echo "  python3 -m venv ~/.venvs/playwright"; \
+		echo "  ~/.venvs/playwright/bin/pip install playwright"; \
+		echo "  ~/.venvs/playwright/bin/python -m playwright install chromium"; \
+		exit 1; \
+	fi
+	@"$(PLAYWRIGHT_PYTHON)" scripts/screenshots.py public tmp/screenshots
 
 clean:  ## remove generated output
 	rm -rf public resources/_gen .hugo_build.lock .hugo-deploy.generated.toml
