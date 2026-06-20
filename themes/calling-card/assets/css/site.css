@@ -12,11 +12,13 @@
   --panel-soft: #273a2d;
   --ink: #f2eadf;
   --ink-soft: #d9d0c2;
-  --muted: #a9bd98;
-  --rule: #7b8f6e;
-  --accent: #d86847;
-  --accent-strong: #f07c55;
-  --shadow: rgba(0, 0, 0, 0.28);
+  --muted: #aebf9f;
+  --rule: #6f8264;
+  --accent: #c2674a;
+  --accent-strong: #e08a6a;
+  --link: #dd8b6e;
+  --link-hover: var(--ink);
+  --shadow: rgba(0, 0, 0, 0.22);
   --serif: "Fraunces", "Iowan Old Style", "Hoefler Text", Georgia, serif;
 }
 
@@ -29,7 +31,7 @@
 
 html {
   min-height: 100%;
-  background: radial-gradient(circle at 15% 15%, #253a2b 0, var(--bg) 35rem);
+  background: radial-gradient(circle at 18% 12%, #213327 0, var(--bg) 44rem);
 }
 
 body {
@@ -44,13 +46,13 @@ body {
 }
 
 a {
-  color: var(--accent-strong);
+  color: var(--link);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.16em;
 }
 
 a:hover {
-  color: var(--ink);
+  color: var(--link-hover);
 }
 
 img {
@@ -88,11 +90,11 @@ img {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(14rem, 20rem);
   gap: clamp(1.25rem, 4vw, 3rem);
-  align-items: center;
+  align-items: start;
   padding: clamp(1.25rem, 4vw, 3rem);
-  border: 1px solid color-mix(in srgb, var(--rule) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
   background: linear-gradient(135deg, var(--panel), var(--panel-soft));
-  box-shadow: 0 1.4rem 4rem var(--shadow);
+  box-shadow: 0 1rem 3rem var(--shadow);
 }
 
 .eyebrow {
@@ -107,8 +109,8 @@ img {
 h1 {
   margin: 0;
   font-weight: 520;
-  font-size: clamp(2.5rem, 7vw, 5rem);
-  line-height: 0.94;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: 0.98;
   font-variation-settings: "opsz" 120, "SOFT" 90, "WONK" 1;
 }
 
@@ -122,13 +124,22 @@ h1 {
 .link-groups {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 1rem 1.5rem;
   max-width: 34rem;
 }
 
 .link-group {
+  grid-column: 1;
   padding-top: 0.8rem;
-  border-top: 1px solid color-mix(in srgb, var(--rule) 72%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--rule) 60%, transparent);
+}
+
+/* The Social group (last) holds its own column so the three short groups
+   stack beside it, keeping both columns close to the same height. */
+.link-group:last-child {
+  grid-column: 2;
+  grid-row: 1 / span 3;
 }
 
 .link-group h2 {
@@ -212,5 +223,11 @@ h1 {
 
   .link-groups {
     grid-template-columns: 1fr;
+  }
+
+  .link-group,
+  .link-group:last-child {
+    grid-column: 1;
+    grid-row: auto;
   }
 }

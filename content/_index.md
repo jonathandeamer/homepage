@@ -15,6 +15,12 @@ links:
     items:
       - name: "LinkedIn"
         url: "https://www.linkedin.com/in/jonathandeamer/"
+  - label: "Elsewhere"
+    items:
+      - name: "Wikipedia"
+        url: "https://en.wikipedia.org/wiki/User:Jonathan_Deamer"
+      - name: "Strava"
+        url: "https://www.strava.com/athletes/18361576"
   - label: "Social"
     items:
       - name: "Bluesky"
@@ -26,12 +32,6 @@ links:
         url: "https://www.threads.net/@jonathandeamer"
       - name: "Twitter"
         url: "https://twitter.com/JonathanDeamer"
-  - label: "Elsewhere"
-    items:
-      - name: "Wikipedia"
-        url: "https://en.wikipedia.org/wiki/User:Jonathan_Deamer"
-      - name: "Strava"
-        url: "https://www.strava.com/athletes/18361576"
 license:
   text: "Everything on this site CC-BY unless otherwise stated."
   url: "https://creativecommons.org/licenses/by/4.0/"
