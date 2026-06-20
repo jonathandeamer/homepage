@@ -245,6 +245,12 @@ h1 {
     order: -1;
   }
 
+  /* Shrink the bordered box to the image so it doesn't stretch the
+     full-width single column, leaving an empty box to the right. */
+  .portrait a {
+    width: fit-content;
+  }
+
   .portrait img {
     width: min(100%, 14rem);
   }
