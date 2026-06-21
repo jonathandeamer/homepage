@@ -10,6 +10,8 @@ from pathlib import Path
 
 
 SITE = "https://jonathandeamer.com"
+GITHUB_URL = "https://github.com/jonathandeamer"
+BLUESKY_URL = "https://bsky.app/profile/jonathandeamer.bsky.social"
 REQUIRED_HOME_META = [
     ("property", "og:title"),
     ("property", "og:description"),
@@ -84,6 +86,22 @@ class HeadParser(HTMLParser):
         return "".join(self.title_parts).strip()
 
 
+class CardParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.elements: list[dict] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attr_map = {name.lower(): value or "" for name, value in attrs}
+        self.elements.append(
+            {
+                "classes": {c for c in attr_map.get("class", "").split() if c},
+                "rel": {r.lower() for r in attr_map.get("rel", "").split() if r},
+                "href": attr_map.get("href", "").strip(),
+            }
+        )
+
+
 def parse_page(path: Path) -> HeadParser:
     parser = HeadParser()
     parser.feed(path.read_text())
@@ -111,6 +129,40 @@ def audit_page(path: Path, expected_canonical: str, required_meta: list[tuple[st
     for key in required_meta:
         if not parser.meta.get(key, "").strip():
             errors.append(f"{label}: missing non-empty {key[1]}")
+
+    return errors
+
+
+def audit_home_card(path: Path) -> list[str]:
+    label = path.name
+    if not path.exists():
+        return []
+
+    parser = CardParser()
+    parser.feed(path.read_text())
+    errors: list[str] = []
+
+    all_classes: set[str] = set()
+    for el in parser.elements:
+        all_classes |= el["classes"]
+
+    if "h-card" not in all_classes:
+        errors.append(f"{label}: missing h-card root")
+    for cls in ("p-name", "p-note", "u-photo", "u-email"):
+        if cls not in all_classes:
+            errors.append(f"{label}: missing {cls} in h-card")
+
+    has_self_url = any(
+        ({"u-url", "u-uid"} & el["classes"]) and el["href"] == f"{SITE}/"
+        for el in parser.elements
+    )
+    if not has_self_url:
+        errors.append(f"{label}: missing u-url/u-uid resolving to {SITE}/")
+
+    rel_me_hrefs = {el["href"] for el in parser.elements if "me" in el["rel"]}
+    for name, url in (("GitHub", GITHUB_URL), ("Bluesky", BLUESKY_URL)):
+        if url not in rel_me_hrefs:
+            errors.append(f"{label}: missing rel=me for {name}")
 
     return errors
 
@@ -162,6 +214,7 @@ def audit_llms(public_dir: Path) -> list[str]:
 def audit_rendered_site(public_dir: Path) -> list[str]:
     errors: list[str] = []
     errors.extend(audit_page(public_dir / "index.html", f"{SITE}/", REQUIRED_HOME_META))
+    errors.extend(audit_home_card(public_dir / "index.html"))
     errors.extend(audit_page(public_dir / "404.html", f"{SITE}/404.html", REQUIRED_404_META))
 
     for feed_name in ("feed.xml", "index.xml"):

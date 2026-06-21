@@ -77,6 +77,22 @@ LLMS_TXT = f"""# Jonathan Deamer
 - [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/): Content licence unless otherwise stated.
 """
 
+GITHUB_URL = "https://github.com/jonathandeamer"
+BLUESKY_URL = "https://bsky.app/profile/jonathandeamer.bsky.social"
+
+HOME_BODY = f"""
+<article class="card h-card">
+  <h1 class="p-name">Jonathan Deamer</h1>
+  <p class="intro p-note">Places you can find me online.</p>
+  <a class="u-email" href="mailto:jonathandeamer@gmail.com">Email</a>
+  <a href="{GITHUB_URL}" rel="me">GitHub</a>
+  <a href="{BLUESKY_URL}" rel="me">Bluesky</a>
+  <a href="https://tilde.zone/@JonathanDeamer" rel="me">Mastodon</a>
+  <img class="u-photo" src="/img/portrait.png" alt="Photo of Jonathan Deamer">
+  <a class="u-url u-uid" href="{SITE}/" hidden></a>
+</article>
+"""
+
 
 def page(head: str, body: str = "<h1>Jonathan Deamer</h1>") -> str:
     return f"<!doctype html><html lang='en-gb'><head>{head}</head><body>{body}</body></html>"
@@ -86,7 +102,7 @@ class RenderedSiteAuditTests(TestCase):
     def test_accepts_valid_rendered_site(self) -> None:
         with TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write(root / "index.html", page(HOME_HEAD))
+            write(root / "index.html", page(HOME_HEAD, HOME_BODY))
             write(root / "404.html", page(NOT_FOUND_HEAD, "<h1>404: there's nothing here</h1>"))
             write(root / "sitemap.xml", f"<?xml version='1.0'?><urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'><url><loc>{SITE}/</loc></url></urlset>")
             write(root / "robots.txt", f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n")
@@ -137,3 +153,38 @@ class RenderedSiteAuditTests(TestCase):
                 f"index.html: canonical 'https://example.com/' does not match expected '{SITE}/'",
                 audit_rendered_site(root),
             )
+
+    def test_accepts_valid_h_card(self) -> None:
+        from scripts.check_rendered_site import audit_home_card
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "index.html", page(HOME_HEAD, HOME_BODY))
+            self.assertEqual(audit_home_card(root / "index.html"), [])
+
+    def test_reports_missing_h_card_root(self) -> None:
+        from scripts.check_rendered_site import audit_home_card
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "index.html", page(HOME_HEAD, HOME_BODY.replace("card h-card", "card")))
+            self.assertIn("index.html: missing h-card root", audit_home_card(root / "index.html"))
+
+    def test_reports_missing_h_card_property(self) -> None:
+        from scripts.check_rendered_site import audit_home_card
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "index.html", page(HOME_HEAD, HOME_BODY.replace('class="u-photo"', 'class="portrait"')))
+            self.assertIn("index.html: missing u-photo in h-card", audit_home_card(root / "index.html"))
+
+    def test_reports_self_url_not_apex(self) -> None:
+        from scripts.check_rendered_site import audit_home_card
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "index.html", page(HOME_HEAD, HOME_BODY.replace(f'href="{SITE}/" hidden', 'href="https://example.com/" hidden')))
+            self.assertIn(f"index.html: missing u-url/u-uid resolving to {SITE}/", audit_home_card(root / "index.html"))
+
+    def test_reports_missing_rel_me_profile(self) -> None:
+        from scripts.check_rendered_site import audit_home_card
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "index.html", page(HOME_HEAD, HOME_BODY.replace(f'href="{GITHUB_URL}" rel="me"', f'href="{GITHUB_URL}"')))
+            self.assertIn("index.html: missing rel=me for GitHub", audit_home_card(root / "index.html"))
