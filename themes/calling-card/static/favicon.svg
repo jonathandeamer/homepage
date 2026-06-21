@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Jonathan Deamer">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#203125"/>
+      <stop offset="1" stop-color="#273a2d"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect x="3.5" y="3.5" width="57" height="57" rx="11" fill="none" stroke="#6f8264" stroke-opacity="0.55"/>
+  <text x="32" y="31" fill="#f2eadf" font-family="Georgia, 'Times New Roman', serif" font-size="37" font-weight="600" letter-spacing="0.5" text-anchor="middle" dominant-baseline="central">JD</text>
+  <rect x="20" y="49" width="24" height="2" rx="1" fill="#c2674a"/>
+</svg>
