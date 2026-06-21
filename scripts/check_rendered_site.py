@@ -98,6 +98,7 @@ class CardParser(HTMLParser):
                 "classes": {c for c in attr_map.get("class", "").split() if c},
                 "rel": {r.lower() for r in attr_map.get("rel", "").split() if r},
                 "href": attr_map.get("href", "").strip(),
+                "value": attr_map.get("value", "").strip(),
             }
         )
 
@@ -153,7 +154,8 @@ def audit_home_card(path: Path) -> list[str]:
             errors.append(f"{label}: missing {cls} in h-card")
 
     has_self_url = any(
-        ({"u-url", "u-uid"} & el["classes"]) and el["href"] == f"{SITE}/"
+        ({"u-url", "u-uid"} & el["classes"])
+        and (el["href"] == f"{SITE}/" or el["value"] == f"{SITE}/")
         for el in parser.elements
     )
     if not has_self_url:

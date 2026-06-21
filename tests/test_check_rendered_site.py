@@ -89,7 +89,7 @@ HOME_BODY = f"""
   <a href="{BLUESKY_URL}" rel="me">Bluesky</a>
   <a href="https://tilde.zone/@JonathanDeamer" rel="me">Mastodon</a>
   <img class="u-photo" src="/img/portrait.png" alt="Photo of Jonathan Deamer">
-  <a class="u-url u-uid" href="{SITE}/" hidden></a>
+  <data class="u-url u-uid" value="{SITE}/"></data>
 </article>
 """
 
@@ -179,8 +179,19 @@ class RenderedSiteAuditTests(TestCase):
         from scripts.check_rendered_site import audit_home_card
         with TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write(root / "index.html", page(HOME_HEAD, HOME_BODY.replace(f'href="{SITE}/" hidden', 'href="https://example.com/" hidden')))
+            write(root / "index.html", page(HOME_HEAD, HOME_BODY.replace(f'value="{SITE}/"', 'value="https://example.com/"')))
             self.assertIn(f"index.html: missing u-url/u-uid resolving to {SITE}/", audit_home_card(root / "index.html"))
+
+    def test_accepts_anchor_self_url(self) -> None:
+        from scripts.check_rendered_site import audit_home_card
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            body = HOME_BODY.replace(
+                f'<data class="u-url u-uid" value="{SITE}/"></data>',
+                f'<a class="u-url u-uid" href="{SITE}/"></a>',
+            )
+            write(root / "index.html", page(HOME_HEAD, body))
+            self.assertEqual(audit_home_card(root / "index.html"), [])
 
     def test_reports_missing_rel_me_profile(self) -> None:
         from scripts.check_rendered_site import audit_home_card
