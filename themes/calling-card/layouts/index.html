@@ -4,10 +4,10 @@
 {{ $portraitWebp := $portrait.Resize "360x360 webp q82" }}
 {{ $portraitPng := $portrait.Resize "360x360 png" }}
 
-<article class="card" aria-labelledby="site-title">
+<article class="card h-card" aria-labelledby="site-title">
   <div class="card-copy">
-    <h1 id="site-title">{{ .Title }}</h1>
-    <p class="intro">{{ .Params.intro }}</p>
+    <h1 class="p-name" id="site-title">{{ .Title }}</h1>
+    <p class="intro p-note">{{ .Params.intro }}</p>
 
     <nav class="link-groups" aria-label="Places to find Jonathan online">
       {{ range .Params.links }}
@@ -15,7 +15,7 @@
           <h2 id="links-{{ .label | anchorize }}">{{ .label }}</h2>
           <ul>
             {{ range .items }}
-              <li><a href="{{ .url }}"{{ with .rel }} rel="{{ . }}"{{ end }}>{{ .name }}</a></li>
+              <li><a href="{{ .url }}"{{ with .rel }} rel="{{ . }}"{{ end }}{{ if strings.HasPrefix .url "mailto:" }} class="u-email"{{ end }}>{{ .name }}</a></li>
             {{ end }}
           </ul>
         </section>
@@ -29,9 +29,10 @@
     <a href="{{ .Params.portrait.href }}" aria-label="View this photo of Jonathan Deamer on Flickr">
       <picture>
         <source type="image/webp" srcset="{{ $portraitWebp.RelPermalink }}">
-        <img src="{{ $portraitPng.RelPermalink }}" alt="{{ .Params.portrait.alt }}" width="{{ $portraitPng.Width }}" height="{{ $portraitPng.Height }}">
+        <img class="u-photo" src="{{ $portraitPng.RelPermalink }}" alt="{{ .Params.portrait.alt }}" width="{{ $portraitPng.Width }}" height="{{ $portraitPng.Height }}">
       </picture>
     </a>
   </aside>
+  <a class="u-url u-uid" href="{{ site.BaseURL }}" hidden></a>
 </article>
 {{ end }}
