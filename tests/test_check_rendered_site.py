@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
@@ -6,6 +7,25 @@ from scripts.check_rendered_site import audit_rendered_site
 
 
 SITE = "https://jonathandeamer.com"
+GITHUB_URL = "https://github.com/jonathandeamer"
+BLUESKY_URL = "https://bsky.app/profile/jonathandeamer.bsky.social"
+MASTODON_URL = "https://tilde.zone/@JonathanDeamer"
+JSON_LD_SCRIPT = (
+    '<script type="application/ld+json">'
+    + json.dumps(
+        {
+            "@context": "https://schema.org",
+            "@type": "Person",
+            "name": "Jonathan Deamer",
+            "url": f"{SITE}/",
+            "description": "Places you can find me online, and ways to get in touch.",
+            "email": "jonathandeamer@gmail.com",
+            "image": f"{SITE}/img/portrait.png",
+            "sameAs": [GITHUB_URL, BLUESKY_URL, MASTODON_URL],
+        }
+    )
+    + "</script>"
+)
 
 
 def write(path: Path, text: str) -> None:
@@ -23,6 +43,7 @@ HOME_HEAD = f"""
 <meta property="og:description" content="Places you can find me online, and ways to get in touch.">
 <meta property="og:url" content="{SITE}/">
 <meta name="twitter:card" content="summary_large_image">
+{JSON_LD_SCRIPT}
 """
 
 
@@ -77,17 +98,16 @@ LLMS_TXT = f"""# Jonathan Deamer
 - [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/): Content licence unless otherwise stated.
 """
 
-GITHUB_URL = "https://github.com/jonathandeamer"
-BLUESKY_URL = "https://bsky.app/profile/jonathandeamer.bsky.social"
-
 HOME_BODY = f"""
 <article class="card h-card">
   <h1 class="p-name">Jonathan Deamer</h1>
   <p class="intro p-note">Places you can find me online.</p>
-  <a class="u-email" href="mailto:jonathandeamer@gmail.com">Email</a>
-  <a href="{GITHUB_URL}" rel="me">GitHub</a>
-  <a href="{BLUESKY_URL}" rel="me">Bluesky</a>
-  <a href="https://tilde.zone/@JonathanDeamer" rel="me">Mastodon</a>
+  <nav class="link-groups">
+    <a class="u-email" href="mailto:jonathandeamer@gmail.com">Email</a>
+    <a href="{GITHUB_URL}" rel="me">GitHub</a>
+    <a href="{BLUESKY_URL}" rel="me">Bluesky</a>
+    <a href="{MASTODON_URL}" rel="me">Mastodon</a>
+  </nav>
   <img class="u-photo" src="/img/portrait.png" alt="Photo of Jonathan Deamer">
   <data class="u-url u-uid" value="{SITE}/"></data>
 </article>
@@ -199,3 +219,43 @@ class RenderedSiteAuditTests(TestCase):
             root = Path(tmp)
             write(root / "index.html", page(HOME_HEAD, HOME_BODY.replace(f'href="{GITHUB_URL}" rel="me"', f'href="{GITHUB_URL}"')))
             self.assertIn("index.html: missing rel=me for GitHub", audit_home_card(root / "index.html"))
+
+    def test_accepts_valid_person_json_ld(self) -> None:
+        from scripts.check_rendered_site import audit_home_json_ld
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "index.html", page(HOME_HEAD, HOME_BODY))
+            self.assertEqual(audit_home_json_ld(root / "index.html"), [])
+
+    def test_reports_missing_person_json_ld(self) -> None:
+        from scripts.check_rendered_site import audit_home_json_ld
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "index.html", page(HOME_HEAD.replace(JSON_LD_SCRIPT, ""), HOME_BODY))
+            self.assertIn("index.html: missing Person JSON-LD block", audit_home_json_ld(root / "index.html"))
+
+    def test_reports_malformed_person_json_ld(self) -> None:
+        from scripts.check_rendered_site import audit_home_json_ld
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            broken_script = '<script type="application/ld+json">{"@type": "Person",</script>'
+            write(root / "index.html", page(HOME_HEAD.replace(JSON_LD_SCRIPT, broken_script), HOME_BODY))
+            errors = audit_home_json_ld(root / "index.html")
+            self.assertTrue(any(error.startswith("index.html: invalid application/ld+json") for error in errors))
+
+    def test_reports_wrong_json_ld_type(self) -> None:
+        from scripts.check_rendered_site import audit_home_json_ld
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "index.html", page(HOME_HEAD.replace('"Person"', '"WebSite"'), HOME_BODY))
+            self.assertIn("index.html: missing Person JSON-LD block", audit_home_json_ld(root / "index.html"))
+
+    def test_reports_json_ld_same_as_drift(self) -> None:
+        from scripts.check_rendered_site import audit_home_json_ld
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write(root / "index.html", page(HOME_HEAD.replace(f'"{GITHUB_URL}", ', ""), HOME_BODY))
+            self.assertIn(
+                "index.html: Person JSON-LD sameAs does not match rendered profile links",
+                audit_home_json_ld(root / "index.html"),
+            )

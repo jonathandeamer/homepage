@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
@@ -103,6 +104,53 @@ class CardParser(HTMLParser):
         )
 
 
+class JsonLdParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.scripts: list[str] = []
+        self.link_group_hrefs: list[str] = []
+        self.email_hrefs: list[str] = []
+        self._in_json_ld = False
+        self._script_parts: list[str] = []
+        self._link_group_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        tag = tag.lower()
+        attr_map = {name.lower(): value or "" for name, value in attrs}
+        classes = {c for c in attr_map.get("class", "").split() if c}
+
+        if tag == "script":
+            script_type = attr_map.get("type", "").lower().split(";")[0].strip()
+            if script_type == "application/ld+json":
+                self._in_json_ld = True
+                self._script_parts = []
+
+        if self._link_group_depth:
+            self._link_group_depth += 1
+        elif tag == "nav" and "link-groups" in classes:
+            self._link_group_depth = 1
+
+        if tag == "a" and self._link_group_depth:
+            href = attr_map.get("href", "").strip()
+            if href.startswith(("http://", "https://")):
+                self.link_group_hrefs.append(href)
+            elif href.startswith("mailto:"):
+                self.email_hrefs.append(href)
+
+    def handle_endtag(self, tag: str) -> None:
+        if self._in_json_ld and tag.lower() == "script":
+            self.scripts.append("".join(self._script_parts).strip())
+            self._in_json_ld = False
+            self._script_parts = []
+
+        if self._link_group_depth:
+            self._link_group_depth -= 1
+
+    def handle_data(self, data: str) -> None:
+        if self._in_json_ld:
+            self._script_parts.append(data)
+
+
 def parse_page(path: Path) -> HeadParser:
     parser = HeadParser()
     parser.feed(path.read_text())
@@ -169,6 +217,91 @@ def audit_home_card(path: Path) -> list[str]:
     return errors
 
 
+def json_ld_objects(data: object) -> list[dict]:
+    if isinstance(data, list):
+        return [obj for item in data for obj in json_ld_objects(item)]
+    if not isinstance(data, dict):
+        return []
+
+    objects = [data]
+    graph = data.get("@graph")
+    if isinstance(graph, list):
+        objects.extend(obj for item in graph for obj in json_ld_objects(item))
+    return objects
+
+
+def has_json_ld_type(item: dict, expected_type: str) -> bool:
+    item_type = item.get("@type")
+    if isinstance(item_type, str):
+        return item_type == expected_type
+    if isinstance(item_type, list):
+        return expected_type in item_type
+    return False
+
+
+def audit_home_json_ld(path: Path) -> list[str]:
+    label = path.name
+    if not path.exists():
+        return []
+
+    text = path.read_text()
+    parser = JsonLdParser()
+    parser.feed(text)
+    errors: list[str] = []
+
+    if not parser.scripts:
+        return [f"{label}: missing Person JSON-LD block"]
+
+    person: dict | None = None
+    for script in parser.scripts:
+        try:
+            data = json.loads(script)
+        except json.JSONDecodeError as exc:
+            errors.append(f"{label}: invalid application/ld+json: {exc.msg}")
+            continue
+
+        for item in json_ld_objects(data):
+            if has_json_ld_type(item, "Person"):
+                person = item
+                break
+        if person:
+            break
+
+    if person is None:
+        errors.append(f"{label}: missing Person JSON-LD block")
+        return errors
+
+    page = parse_page(path)
+    if person.get("@context") != "https://schema.org":
+        errors.append(f"{label}: Person JSON-LD has wrong @context")
+    if person.get("name") != page.title:
+        errors.append(f"{label}: Person JSON-LD name does not match page title")
+    if person.get("url") != f"{SITE}/":
+        errors.append(f"{label}: Person JSON-LD url does not match {SITE}/")
+
+    description = page.meta.get(("name", "description"), "").strip()
+    if description and person.get("description") != description:
+        errors.append(f"{label}: Person JSON-LD description does not match page description")
+
+    expected_email = ""
+    if parser.email_hrefs:
+        expected_email = parser.email_hrefs[0].removeprefix("mailto:")
+    if expected_email and person.get("email") != expected_email:
+        errors.append(f"{label}: Person JSON-LD email does not match rendered email link")
+
+    image = person.get("image")
+    if not isinstance(image, str) or not image.startswith(f"{SITE}/"):
+        errors.append(f"{label}: Person JSON-LD image must be an absolute site URL")
+
+    same_as = person.get("sameAs")
+    if not isinstance(same_as, list) or any(not isinstance(url, str) for url in same_as):
+        errors.append(f"{label}: Person JSON-LD sameAs must be a list of URLs")
+    elif set(same_as) != set(parser.link_group_hrefs):
+        errors.append(f"{label}: Person JSON-LD sameAs does not match rendered profile links")
+
+    return errors
+
+
 def audit_sitemap(public_dir: Path) -> list[str]:
     path = public_dir / "sitemap.xml"
     if not path.exists():
@@ -217,6 +350,7 @@ def audit_rendered_site(public_dir: Path) -> list[str]:
     errors: list[str] = []
     errors.extend(audit_page(public_dir / "index.html", f"{SITE}/", REQUIRED_HOME_META))
     errors.extend(audit_home_card(public_dir / "index.html"))
+    errors.extend(audit_home_json_ld(public_dir / "index.html"))
     errors.extend(audit_page(public_dir / "404.html", f"{SITE}/404.html", REQUIRED_404_META))
 
     for feed_name in ("feed.xml", "index.xml"):
