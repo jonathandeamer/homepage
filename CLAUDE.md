@@ -89,3 +89,12 @@ root — deploy with `source .deploy.env && make deploy` (preview first with
 `make deploy-dry`).
 
 Do not guess AWS values. If they are not available, fail clearly and ask the user.
+
+### Edge configuration (CloudFront + DNS)
+
+Set in the AWS account, outside the repo, but load-bearing:
+
+- The distribution's default behaviour uses the **`homepage-security-headers`** response-headers policy (HSTS, CSP, `X-Frame-Options`, `Referrer-Policy`, `X-Content-Type-Options`, `Permissions-Policy`) and the managed **`CachingOptimized`** cache policy — the latter enables gzip/brotli and edge caching that honours the deploy matchers' `Cache-Control` (it replaced `CachingDisabled`, which left the site uncached and uncompressed).
+- **CSP is enforced in two places** — the `<meta>` tag in `head-meta.html` *and* the CloudFront response header. Keep them in sync; the header additionally sets `frame-ancestors`.
+- **HSTS deliberately omits `includeSubDomains`** because `nex.jonathandeamer.com` is HTTP-only; asserting it would make that host unreachable.
+- A **CAA** record on the apex restricts certificate issuance to Amazon (`amazon.com`). Issuing a non-ACM cert for any name under the domain (e.g. on `nex`) requires adding that CA to the CAA record first.
