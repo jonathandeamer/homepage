@@ -78,15 +78,19 @@ when the URL begins `mailto:`.
 **Representative h-card self-reference.** A microformats parser treats an
 h-card as *representing the page* when the page contains exactly one h-card
 whose `u-url` equals the page URL. There is no natural visible self-link on the
-card, so add one visually-hidden anchor inside the `h-card` root:
+card, so carry the URL on a non-interactive `<data>` element inside the
+`h-card` root:
 
 ```html
-<a class="u-url u-uid" href="{{ site.BaseURL }}" hidden></a>
+<data class="u-url u-uid" value="{{ site.BaseURL }}"></data>
 ```
 
-`hidden` keeps it out of the visual layout and the accessibility tree while
-remaining in the DOM for parsers. This is preferred over wrapping the `<h1>` in
-a self-link, which would change visible/interactive behaviour.
+microformats2 reads `u-*` properties from a `<data>` element's `value`
+attribute. `<data>` is valid HTML, renders nothing, and — being a
+non-interactive element — introduces no accessibility issue. (An earlier draft
+used a `hidden` empty `<a>` here; that tripped a pa11y WCAG H91 "anchor with no
+link content" error, so it was replaced with `<data>`. The contract audit
+therefore accepts the self-url via a `value=` attribute as well as `href=`.)
 
 ### 3. Contract enforcement
 

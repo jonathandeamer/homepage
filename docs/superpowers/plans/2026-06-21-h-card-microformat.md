@@ -274,12 +274,14 @@ portrait `<img>` (line 32) — add `u-photo` to the class:
         <img class="u-photo" src="{{ $portraitPng.RelPermalink }}" alt="{{ .Params.portrait.alt }}" width="{{ $portraitPng.Width }}" height="{{ $portraitPng.Height }}">
 ```
 
-Add the hidden self-referencing anchor inside the `h-card` root, immediately before the closing `</article>` (after line 35's `</aside>`):
+Add the self-referencing `<data>` element inside the `h-card` root, immediately before the closing `</article>` (after line 35's `</aside>`). A non-interactive `<data>` carries the URL via its `value` attribute without an empty anchor (which would trip a pa11y WCAG H91 error):
 
 ```html
-  <a class="u-url u-uid" href="{{ site.BaseURL }}" hidden></a>
+  <data class="u-url u-uid" value="{{ site.BaseURL }}"></data>
 </article>
 ```
+
+The Task 1 audit accepts this self-url via `value=` as well as `href=`.
 
 - [ ] **Step 3: Build and run the full contract check**
 
